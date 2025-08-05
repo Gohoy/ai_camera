@@ -3,11 +3,9 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  permission_handler_windows
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
-  tflite_flutter
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

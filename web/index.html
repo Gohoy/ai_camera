@@ -1,38 +1,124 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="YOLO11 AI Camera - Real-time object detection camera">
 
-  <!-- iOS meta tags & icons -->
+  <!-- Mobile meta tags -->
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="ai_camera">
+  <meta name="apple-mobile-web-app-title" content="YOLO11 AI相机">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>ai_camera</title>
+  <title>YOLO11 AI相机</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      color: #fff;
+      font-family: sans-serif;
+    }
+    
+    #loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    
+    .spinner {
+      border: 3px solid #333;
+      border-top: 3px solid #4CAF50;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .camera-notice {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(76, 175, 80, 0.9);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 1000;
+      display: none;
+    }
+  </style>
 </head>
 <body>
+  <!-- Loading indicator -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <div style="margin-top: 20px;">正在加载YOLO11 AI相机...</div>
+  </div>
+
+  <!-- Camera permission notice -->
+  <div id="camera-notice" class="camera-notice">
+    🎥 正在获取相机权限...
+  </div>
+
+  <script>
+    // 相机权限预检查
+    async function setupCamera() {
+      if (!navigator.mediaDevices) {
+        console.warn('浏览器不支持相机');
+        return;
+      }
+
+      try {
+        document.getElementById('camera-notice').style.display = 'block';
+        document.getElementById('camera-notice').textContent = '🎥 正在获取相机权限...';
+        
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        stream.getTracks().forEach(track => track.stop());
+        
+        console.log('✅ 相机权限已获取');
+        document.getElementById('camera-notice').textContent = '✅ 相机权限已获取';
+        
+        setTimeout(() => {
+          document.getElementById('camera-notice').style.display = 'none';
+        }, 2000);
+        
+      } catch (error) {
+        console.error('❌ 相机权限失败:', error);
+        const notice = document.getElementById('camera-notice');
+        notice.textContent = '❌ 需要相机权限才能使用AI识别功能';
+        notice.style.background = 'rgba(244, 67, 54, 0.9)';
+      }
+    }
+
+    // Flutter加载完成后隐藏loading
+    window.addEventListener('flutter-first-frame', function () {
+      document.getElementById('loading').style.display = 'none';
+    });
+
+    // 页面加载完成后检查相机
+    window.addEventListener('load', function() {
+      setTimeout(setupCamera, 500);
+    });
+  </script>
+
+  <!-- Flutter应用加载脚本 -->
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
